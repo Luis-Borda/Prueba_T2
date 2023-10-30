@@ -57,6 +57,10 @@ parques_geometria <- parques_sf$osm_polygons %>%
 
 centroides <- gCentroid(as(parques_geometria$geometry, "Spatial"), byid = T)
 
+#Plot Map
+
+latitud_central <- mean(train$lat)
+longitud_central <- mean(train$lon)
 # Creamos el mapa de Bogotá 
 
 leaflet() %>%
