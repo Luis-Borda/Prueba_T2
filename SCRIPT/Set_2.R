@@ -362,8 +362,6 @@ centroides_sf <- do.call(rbind, st_geometry(centroides)) %>%
 centroides_sf <- st_as_sf(centroides_sf, coords = c("lon", "lat"), crs=4326)
 
 
-# Esto va a ser demorado!
-
 # Calculamos las distancias al paradero mas cercano
 
 nearest <- st_nearest_feature(db_sf,centroides_sf)
