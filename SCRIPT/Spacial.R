@@ -131,6 +131,7 @@ areas <- st_area(parques_geometria)
 train <- train %>%
   mutate(area_parque = as.numeric(areas[posicion]))
 
+
 # Se realiza el gráfico (plot) de la relación 
 
 p <- ggplot(train%>%sample_n(1000), aes(x = area_parque, y = price)) +
@@ -143,40 +144,81 @@ p <- ggplot(train%>%sample_n(1000), aes(x = area_parque, y = price)) +
   theme_bw()
 ggplotly(p)
 
+#########Ahora para test
+
+latitud_central <- mean(test$lat)
+longitud_central <- mean(test$lon)
+
+
+db_sf <- st_as_sf(test, coords = c("lon", "lat"))
+
+# Especificamos el sistema de coordenadas.
+
+st_crs(db_sf) <- 4326
+
+# convertimos los scontroides a formato sf(simple features)
+
+centroides_sf <- st_as_sf(centroides, coords = c("x", "y"))
+
+
+# Calculamos las distancias para cada combinacion immueble - parque
+
+dist_matrix <- st_distance(x = db_sf, y = centroides_sf)
+
+# Encontramos la distancia mínima a un parque
+
+dist_min_parque <- apply(dist_matrix, 1, min)
+
+# La agregamos como variablea nuestra base de datos original # *****************
+
+test <- test %>% mutate(distancia_parque = dist_min_parque)
+
+
+# Se evalua si el tamaño del parque más cercano influye #
+
+posicion <- apply(dist_matrix, 1, function(x) which(min(x) == x))
+
+# De la geometria de los parques extraemos el aréa
+
+areas <- st_area(parques_geometria)
+
+#Agregamos la variable a nuestra base de datos original - SE INCLUYE VARIABLE POSICION -
+
+test <- test %>%
+  mutate(area_parque = as.numeric(areas[posicion]))
+
+
+################################################################################
 ####### *VARIABLE ESTACIONES DE TRANSMILENIO* (mismo procedimiento) ############
+################################################################################
 
 # Extraemos la info de las estaciones del Transmilenio
 
-parada_de_bus <- opq(bbox = getbb("Bogotá Colombia")) %>%
+transmilenio <- opq(bbox = getbb("Bogotá Colombia")) %>%
   add_osm_feature(key ='amenity' , value = 'bus_station') 
 
 # Cambiamos el formato para que sea un objeto sf (simple features) (mismo proccedimiento anteriormente descrito)
 
-parada_de_bus_sf <- osmdata_sf(parada_de_bus)
+transmilenio_sf <- osmdata_sf(transmilenio)
 
 # De las features de estaciones nos interesa su geomoetría y donde están ubicados 
 
-parada_de_bus_sf_geometria <- parada_de_bus_sf$osm_polygons %>% 
+transmilenio_geometria <- transmilenio_sf$osm_polygons %>% 
   select(osm_id, name)
 
 # Calculamos el centroide de cada estacione para aproximar su ubicación como un solo punto 
 
-centroides <- gCentroid(as(parada_de_bus_sf_geometria$geometry, "Spatial"), byid = T)
-
-centroides <-st_centroid(parada_de_bus_sf_geometria$geometry)
+centroidest <- gCentroid(as(transmilenio_geometria$geometry, "Spatial"), byid = T)
 
 # Creamos el mapa de Bogotá  con los paraderos
 
 leaflet() %>%
   addTiles() %>%
   setView(lng = longitud_central, lat = latitud_central, zoom = 12) %>%
-  addPolygons(data = parada_de_bus_sf_geometria, col = "red",weight = 10,
-              opacity = 0.8, popup = parada_de_bus_sf_geometria$name) %>%
-  addCircles(data=centroides,col = 'blue' , opacity = 0.5, radius = 1)
+  addPolygons(data = transmilenio_geometria, col = "red",weight = 5,
+              opacity = 0.8, popup = transmilenio_geometria$name) %>%
+  addCircles(data=centroidest,col = 'blue' , opacity = 0.5, radius = 1)
 
-#lng = centroides$x, Por qué no pusimos esto?
-#            lat = centroides$y, 
-#            col = '#698B69' , opacity = 0.5, radius = 1)
 
 # Primero tomamos nuestros datos y los convertimos al formato sf (simple features)
 # Esto para que esten en el mismo formato de los paraderos y poder calcuar distancias. 
@@ -185,27 +227,55 @@ train_sf <- st_as_sf(train, coords = c("lon", "lat"), crs=4326)
 
 # convertimos los centroides a formato sf(simple features) 
 
-centroides_sf <- st_as_sf(centroides, coords = c("lon", "lat"), crs=4326)
-
-centroides_sf <- do.call(rbind, st_geometry(centroides)) %>% 
-  as_tibble() %>% setNames(c("lon","lat")) 
-centroides_sf <- st_as_sf(centroides_sf, coords = c("lon", "lat"), crs=4326)
+centroides_sf <- st_as_sf(centroidest, coords = c("lon", "lat"), crs=4326)
 
 
-# Calculamos las distancias al paradero mas cercano
+# Calculamos las distancias a la estación mas cercana
 
-nearest <- st_nearest_feature(db_sf,centroides_sf)
+nearest <- st_nearest_feature(train_sf,centroides_sf)
 
-train<- train %>% mutate(distancia_bus=st_distance(x = db_sf, y = centroides_sf[nearest,], by_element=TRUE))
+train<- train %>% mutate(distancia_bus=st_distance(x = train_sf, y = centroides_sf[nearest,], by_element=TRUE))
 
 
-p <- ggplot(train, aes(x = distancia_bus)) +
+t <- ggplot(train, aes(x = distancia_bus)) +
   geom_histogram(bins = 50, fill = "darkblue", alpha = 0.4) +
-  labs(x = "Distancia mínima a un parad de bus en metros", y = "Cantidad",
-       title = "Distribución de la distancia a las parada de bus") +
+  labs(x = "Distancia mínima a una estación de Transmilenio en metros", y = "Cantidad",
+       title = "Distribución de la distancia a la estación de Transmilenio") +
   theme_bw()
 library(units)
-ggplotly(p)
+ggplotly(t)
+
+#######################TEST 
+latitud_central <- mean(test$lat)
+longitud_central <- mean(test$lon)
+
+
+test_sf <- st_as_sf(test, coords = c("lon", "lat"))
+
+# Especificamos el sistema de coordenadas.
+
+st_crs(test_sf) <- 4326
+
+# convertimos los scontroides a formato sf(simple features)
+
+centroidest <- st_as_sf(centroidest, coords = c("lon", "lat"), crs=4326)
+
+
+# Calculamos las distancias para cada combinacion immueble - parque
+
+dist_matrix <- st_distance(x = test_sf, y = centroidest)
+
+# Encontramos la distancia mínima a un parque
+
+dist_min_transm <- apply(dist_matrix, 1, min)
+nearestest <- st_nearest_feature(test_sf,centroidest)
+
+
+# La agregamos como variablea nuestra base de datos original # *****************
+
+test<- test %>% mutate(distancia_bus=st_distance(x = test_sf, y = centroidest[nearestest,], by_element=TRUE))
+
+
 
 ################################################################################
 #################     DISTANCIA A AVENIDAS MAS CERCANAS         ################
@@ -235,12 +305,34 @@ dist <-st_distance(train, avenidas_geometria[cercano,], by_element=TRUE)
 dist
 train$distancia_avenida_principal<-dist
 
+#########################TEST
+test<-st_as_sf(test,coords=c("lon","lat"),crs=4326,remove=FALSE) #as an sf object
+
+avenidas <- opq(bbox=getbb("Bogota Colombia"))%>%
+  add_osm_feature(key = "highway", value = "secondary")
+
+avenidas_sf <- osmdata_sf(avenidas)
+
+avenidas_geometria <- avenidas_sf$osm_lines%>%
+  select (osm_id, name)
+
+leaflet()%>%
+  addTiles()%>%
+  addPolygons(data = avenidas_geometria, col = "#F72585",
+              opacity = 0.8, popup= avenidas_geometria)%>%
+  addCircles(data=test)
+
+#Busco la geometría más cercana
+cercano <- st_nearest_feature(test,avenidas_geometria)
+#calculo la distancia
+dist <-st_distance(test, avenidas_geometria[cercano,], by_element=TRUE)
+dist
+test$distancia_avenida_principal<-dist
 
 
 ################################################################################
 ####              Obtenenemos las universidades                             ####
 ################################################################################
-
 
 
 universidades<- bogota %>% 
