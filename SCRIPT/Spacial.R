@@ -507,7 +507,7 @@ p <- ggplot(train, aes(x = puntos_restaurant)) +
   theme_bw()
 ggplotly(p)
 
-#Relación del precio vs la distancia a la policia 
+#Relación del precio vs la distancia a los restaurantes 
 rest <- ggplot(train%>%sample_n(1000), aes(x = distancia_policia, y = price)) +
   geom_point(col = "darkblue", alpha = 0.4) +
   labs(x = "Distancia mínima a los restaurantes en metros (log-scale)", 
