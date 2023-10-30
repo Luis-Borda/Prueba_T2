@@ -19,8 +19,8 @@
 
 rm(list = ls())
 
-# Cargar pacman (contiene la función p_load)
-library(pacman) 
+# Cargamos librerias
+require("pacman")
 
 # Cargar las librerías listadas e instalarlas en caso de ser necesario
 p_load(tidyverse, # Manipular dataframes
@@ -34,8 +34,8 @@ p_load(tidyverse, # Manipular dataframes
        tidymodels, # Modelado de datos limpios y ordenados
        randomForest, # Modelos de bosque aleatorio
        rattle, # Interfaz gráfica para el modelado de datos
-       spatialsample) # Muestreo espacial para modelos de aprendizaje automático
-
+       spatialsample,# Muestreo espacial para modelos de aprendizaje automático
+       tmaptools) 
 
 
 #Importar los datos---------------------------------------------------------
