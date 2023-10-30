@@ -251,13 +251,6 @@ ggplot()+
   theme_bw()
 
 
-UN_BOG <-universidades$osm_polygons
-UN_BOG
-
-ggplot()+
-  geom_sf(data=UN_BOG) +
-  theme_bw()
-
 ################################################################################
 
 # Calculamos el centroide de cada universidad para aproximar s ubciacion como un solo punto 
@@ -315,13 +308,38 @@ ggplot()+
   geom_sf(data=puntos_policia) +
   theme_bw()
 
+--------
 
-UN_BOG <-policia$osm_polygons
-UN_BOG
+db_sf <- st_as_sf(train, coords = c("lon", "lat"))
+# Especificamos el sistema de coordenadas.
+st_crs(db_sf) <- 4326
 
-ggplot()+
-  geom_sf(data=UN_BOG) +
+# Calculamos las distancias para cada combinacion immueble - policia
+dist_matrix <- st_distance(x = db_sf, y = puntos_policia)
+
+# Encontramos la distancia mínima a la policia
+dist_min <- apply(dist_matrix, 1, min)
+# La agregamos como variablea nuestra base de datos original 
+train <- train %>% mutate(distancia_policia = dist_min)
+
+p <- ggplot(train, aes(x = distancia_policia)) +
+  geom_histogram(bins = 50, fill = "darkblue", alpha = 0.4) +
+  labs(x = "Distancia mínima a la policia en metros", y = "Cantidad",
+       title = "Distribución de la distancia a la policia") +
   theme_bw()
+ggplotly(p)
+
+#Relación del precio vs la distancia a la policia 
+p <- ggplot(train%>%sample_n(1000), aes(x = distancia_policia, y = price)) +
+  geom_point(col = "darkblue", alpha = 0.4) +
+  labs(x = "Distancia mínima a la policia en metros (log-scale)", 
+       y = "Valor de venta  (log-scale)",
+       title = "Relación entre la proximidad a la policia y el precio del immueble") +
+  scale_x_log10() +
+  scale_y_log10(labels = scales::dollar) +
+  theme_bw()
+ggplotly(p)
+
 
 ################################################################################
 ####              Obtenenemos Restaurantes                                  ####
