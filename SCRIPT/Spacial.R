@@ -486,30 +486,52 @@ ggplot()+
   geom_sf(data=puntos_restaurant) +
   theme_bw()
 
-UN_BOG <-policia$osm_points
-UN_BOG
+--------
+  
+rest_sf <- st_as_sf(train, coords = c("lon", "lat"))
+# Especificamos el sistema de coordenadas.
+st_crs(rest_sf) <- 4326
 
-ggplot()+
-  geom_sf(data=UN_BOG) +
+# Calculamos las distancias para cada combinacion immueble - restaurante
+dist_matrix <- st_distance(x = rest_sf, y = puntos_restaurant)
+
+# Encontramos la distancia mínima a los restaurantes
+dist_min <- apply(dist_matrix, 1, min)
+# La agregamos como variablea nuestra base de datos original 
+train <- train %>% mutate(puntos_restaurant = dist_min)
+
+p <- ggplot(train, aes(x = puntos_restaurant)) +
+  geom_histogram(bins = 50, fill = "darkblue", alpha = 0.4) +
+  labs(x = "Distancia mínima a los restaurantes en metros", y = "Cantidad",
+       title = "Distribución de la distancia a los restaurantes") +
   theme_bw()
+ggplotly(p)
 
-
-################################################################################
-####              Obtenenemos Parqueaderos                                  ####
-################################################################################
-
-
-parking<- bogota %>% 
-  add_osm_feature(key="amenity",value="parking") %>% 
-  osmdata_sf() #transformamos a un objeto sf
-
-puntos_parking<-parking$osm_point
-head(puntos_parking)
-
-ggplot()+
-  geom_sf(data=puntos_parking) +
+#Relación del precio vs la distancia a la policia 
+rest <- ggplot(train%>%sample_n(1000), aes(x = distancia_policia, y = price)) +
+  geom_point(col = "darkblue", alpha = 0.4) +
+  labs(x = "Distancia mínima a los restaurantes en metros (log-scale)", 
+       y = "Valor de venta  (log-scale)",
+       title = "Relación entre la proximidad a los restaurantes y el precio del immueble") +
+  scale_x_log10() +
+  scale_y_log10(labels = scales::dollar) +
   theme_bw()
+ggplotly(rest)
 
+###############TEST
+
+
+rest_sf <- st_as_sf(test, coords = c("lon", "lat"))
+# Especificamos el sistema de coordenadas.
+st_crs(rest_sf) <- 4326
+
+# Calculamos las distancias para cada combinacion immueble - restaurantes
+dist_matrix <- st_distance(x = rest_sf, y = puntos_restaurant)
+
+# Encontramos la distancia mínima a un restaurante
+dist_min <- apply(dist_matrix, 1, min)
+# La agregamos como variablea nuestra base de datos original 
+test <- test %>% mutate(puntos_restaurant = dist_min)
 
 ################################################################################
 ####              Obtenenemos Jardines infantiles                                  ####
@@ -560,6 +582,25 @@ head(puntos_SC)
 ggplot()+
   geom_sf(data=puntos_SC) +
   theme_bw()
+
+
+################################################################################
+####              Obtenenemos Parqueaderos                                  ####
+################################################################################
+
+
+parking<- bogota %>% 
+  add_osm_feature(key="amenity",value="parking") %>% 
+  osmdata_sf() #transformamos a un objeto sf
+
+puntos_parking<-parking$osm_point
+head(puntos_parking)
+
+ggplot()+
+  geom_sf(data=puntos_parking) +
+  theme_bw()
+
+
 
 ################################################################################
 ####              Obtenenemos bares                                 ####
