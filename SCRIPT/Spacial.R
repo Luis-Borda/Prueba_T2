@@ -485,5 +485,4 @@ write_csv(test_df, file="Bogota_test.csv")
 ####
 ##
 
-
-
+test<-st_as_sf(test,coords=c("lon","lat"),crs=4326,remove=FALSE) #as an sf object
