@@ -431,7 +431,7 @@ ggplot()+
   theme_bw()
 
 ################################################################################
-####              Obtenenemos postales                                 ####
+####              Obtenenemos hospitales                                 ####
 ################################################################################
 
 
@@ -440,7 +440,7 @@ hospital<- bogota %>%
   osmdata_sf() 
 
 phospital<-hospital$osm_point
-head(puntos_SC)
+head(phospital)
 
 ggplot()+
   geom_sf(data=phospital) +
