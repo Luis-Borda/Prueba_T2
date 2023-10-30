@@ -542,35 +542,35 @@ jardines<- bogota %>%
   add_osm_feature(key="amenity",value="kindergarten") %>% 
   osmdata_sf() 
 
-puntos_jardines<-jardines$osm_point
+puntos_jar<-jardines$osm_point
 head(puntos_jardines)
 
 ggplot()+
-  geom_sf(data=puntos_jardines) +
+  geom_sf(data=puntos_jar) +
   theme_bw()
 
 --------
   
-  rest_sf <- st_as_sf(train, coords = c("lon", "lat"))
+jar_sf <- st_as_sf(train, coords = c("lon", "lat"))
 # Especificamos el sistema de coordenadas.
-st_crs(rest_sf) <- 4326
+st_crs(jar_sf) <- 4326
 
-# Calculamos las distancias para cada combinacion immueble - restaurante
-dist_matrix <- st_distance(x = rest_sf, y = puntos_restaurant)
+# Calculamos las distancias para cada combinacion immueble - jardines inf
+dist_matrixj <- st_distance(x = jar_sf, y = puntos_jar)
 
-# Encontramos la distancia mínima a los restaurantes
-dist_min <- apply(dist_matrix, 1, min)
+# Encontramos la distancia mínima a los jardines inf
+dist_minj <- apply(dist_matrixj, 1, min)
 # La agregamos como variablea nuestra base de datos original 
-train <- train %>% mutate(puntos_restaurant = dist_min)
+train <- train %>% mutate(dist_jar = dist_minj)
 
-p <- ggplot(train, aes(x = puntos_restaurant)) +
+jf <- ggplot(train, aes(x = puntos_jar)) +
   geom_histogram(bins = 50, fill = "darkblue", alpha = 0.4) +
-  labs(x = "Distancia mínima a los restaurantes en metros", y = "Cantidad",
-       title = "Distribución de la distancia a los restaurantes") +
+  labs(x = "Distancia mínima a los jardines en metros", y = "Cantidad",
+       title = "Distribución de la distancia a los jardines") +
   theme_bw()
-ggplotly(p)
+ggplotly(jf)
 
-#Relación del precio vs la distancia a la policia 
+#Relación del precio vs la distancia a los jardines infantiles 
 rest <- ggplot(train%>%sample_n(1000), aes(x = distancia_policia, y = price)) +
   geom_point(col = "darkblue", alpha = 0.4) +
   labs(x = "Distancia mínima a los restaurantes en metros (log-scale)", 
@@ -584,17 +584,17 @@ ggplotly(rest)
 ###############TEST
 
 
-rest_sf <- st_as_sf(test, coords = c("lon", "lat"))
+jar_sf <- st_as_sf(test, coords = c("lon", "lat"))
 # Especificamos el sistema de coordenadas.
 st_crs(rest_sf) <- 4326
 
-# Calculamos las distancias para cada combinacion immueble - restaurantes
-dist_matrix <- st_distance(x = rest_sf, y = puntos_restaurant)
+# Calculamos las distancias para cada combinacion immueble - jardines
+dist_matrix <- st_distance(x = jar_sf, y = puntos_jar)
 
 # Encontramos la distancia mínima a un restaurante
 dist_min <- apply(dist_matrix, 1, min)
 # La agregamos como variablea nuestra base de datos original 
-test <- test %>% mutate(puntos_restaurant = dist_min)
+test <- test %>% mutate(puntos_jar = dist_min)
 
 
 ################################################################################
