@@ -330,6 +330,7 @@ dist
 test$distancia_avenida_principal<-dist
 
 
+
 ################################################################################
 ####              Obtenenemos las universidades                             ####
 ################################################################################
@@ -339,7 +340,7 @@ universidades<- bogota %>%
   add_osm_feature(key="amenity",value="university") %>% # de las amenities disponibles, seleccionamos las universidades
   osmdata_sf() #transformamos a un objeto sf
 
-puntos_universidades<-universidades$osm_point
+puntos_universidades<-universidades$osm_polygons
 head(puntos_universidades)
 
 ggplot()+
@@ -350,7 +351,7 @@ ggplot()+
 ################################################################################
 
 # Calculamos el centroide de cada universidad para aproximar s ubciacion como un solo punto 
-centroidesU <- gCentroid(as(UN_BOG$geometry, "Spatial"), byid = T)
+centroidesU <- gCentroid(as(puntos_universidades$geometry, "Spatial"), byid = T)
 
 
 db_sf <- st_as_sf(train, coords = c("lon", "lat"))
@@ -385,6 +386,22 @@ p <- ggplot(train%>%sample_n(1000), aes(x = distancia_universidad, y = price)) +
   theme_bw()
 ggplotly(p)
 
+###############TEST
+
+uni_sf <- st_as_sf(test, coords = c("lon", "lat"))
+# Especificamos el sistema de coordenadas.
+st_crs(uni_sf) <- 4326
+# convertimos los scontroides a formato sf(simple features)
+centroides_U <- st_as_sf(centroidesU, coords = c("x", "y"))
+
+# Calculamos las distancias para cada combinacion immueble - universidad
+dist_matrix <- st_distance(x = uni_sf, y = centroides_U)
+
+# Encontramos la distancia mínima a una Universidad
+dist_min <- apply(dist_matrix, 1, min)
+# La agregamos como variablea nuestra base de datos original 
+test <- test %>% mutate(distancia_universidad = dist_min)
+
 
 
 ################################################################################
@@ -406,12 +423,12 @@ ggplot()+
 
 --------
 
-db_sf <- st_as_sf(train, coords = c("lon", "lat"))
+pol_sf <- st_as_sf(train, coords = c("lon", "lat"))
 # Especificamos el sistema de coordenadas.
 st_crs(db_sf) <- 4326
 
 # Calculamos las distancias para cada combinacion immueble - policia
-dist_matrix <- st_distance(x = db_sf, y = puntos_policia)
+dist_matrix <- st_distance(x = pol_sf, y = puntos_policia)
 
 # Encontramos la distancia mínima a la policia
 dist_min <- apply(dist_matrix, 1, min)
@@ -426,7 +443,7 @@ p <- ggplot(train, aes(x = distancia_policia)) +
 ggplotly(p)
 
 #Relación del precio vs la distancia a la policia 
-p <- ggplot(train%>%sample_n(1000), aes(x = distancia_policia, y = price)) +
+pol <- ggplot(train%>%sample_n(1000), aes(x = distancia_policia, y = price)) +
   geom_point(col = "darkblue", alpha = 0.4) +
   labs(x = "Distancia mínima a la policia en metros (log-scale)", 
        y = "Valor de venta  (log-scale)",
@@ -434,7 +451,23 @@ p <- ggplot(train%>%sample_n(1000), aes(x = distancia_policia, y = price)) +
   scale_x_log10() +
   scale_y_log10(labels = scales::dollar) +
   theme_bw()
-ggplotly(p)
+ggplotly(pol)
+
+###############TEST
+
+
+pol_sf <- st_as_sf(test, coords = c("lon", "lat"))
+# Especificamos el sistema de coordenadas.
+st_crs(pol_sf) <- 4326
+
+# Calculamos las distancias para cada combinacion immueble - universidad
+dist_matrix <- st_distance(x = pol_sf, y = puntos_policia)
+
+# Encontramos la distancia mínima a una Universidad
+dist_min <- apply(dist_matrix, 1, min)
+# La agregamos como variablea nuestra base de datos original 
+test <- test %>% mutate(distancia_policia = dist_min)
+
 
 
 ################################################################################
