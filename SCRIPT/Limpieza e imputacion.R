@@ -27,10 +27,11 @@ p_load(tidyverse, # Manipular dataframes
        VIM,
        discrim,
        kknn,
-       stargazer) 
+       stargazer,
+       readr) 
 
-test <- read_csv("C:/Users/Hp/Documents/MeCA - Big Data and Machine Learning/Set_2/Set_2/test.csv")
-train <- read_csv("C:/Users/Hp/Documents/MeCA - Big Data and Machine Learning/Set_2/Set_2/train.csv")
+test <- read_csv("C:/Users/lordb/Documents/Prueba_T2/SCRIPT/test.csv")
+train <- read_csv("C:/Users/lordb/Documents/Prueba_T2/SCRIPT/train.csv")
 
 dim(test)
 dim(train)
@@ -60,10 +61,12 @@ test %>%
 skim(train)
 skim(test)
 
-test %>%
-  summarise_all(~sum(is.na(.)))
 train %>%
   summarise_all(~sum(is.na(.)))
+
+test %>%
+  summarise_all(~sum(is.na(.)))
+
 
 #
 sapply(train, function(x) sum(is.na(x)))
@@ -72,13 +75,21 @@ sapply(test, function(x) sum(is.na(x)))
 ## Imputación de datos faltantes por mediana y moda
 
 table(train$rooms) #Se evidencia que la mayoría de viviendas tienen 3 cuartos, por lo tanto se imputan los datos con moda = 3
-table(test$price) #Se evidencia que la mayoría de viviendas tienen 3 dormitorios, por lo tanto se imputan los datos con moda = 3
-table(train$bathrooms) #Se evidencia que la mayoría de viviendas tienen 3 cuartos, por lo tanto se imputan los datos con moda = 3
+table(train$bathrooms) #Se evidencia que la mayoría de viviendas tienen 2 cuartos, por lo tanto se imputan los datos con moda = 2
+
+table(test$rooms) #Se evidencia que la mayoría de viviendas tienen 3 cuartos, por lo tanto se imputan los datos con moda = 3
+table(test$bathrooms) #Se evidencia que la mayoría de viviendas tienen 2 cuartos, por lo tanto se imputan los datos con moda = 2
+
 
 #El mismo análisis se hace con los datos en la base test
 
 m_sup_cubierta <- median(train$surface_covered, na.rm = T) 
 m_sup_total <- median(train$surface_total, na.rm = T)
+
+
+m_sup_cubierta <- median(test$surface_covered, na.rm = T) 
+m_sup_total <- median(test$surface_total, na.rm = T)
+
 
 train <- train %>%
   mutate(rooms= replace_na(rooms, 3), #No se coloca bedrooms, toda vez que, para train no se evidencian NA's
@@ -86,10 +97,25 @@ train <- train %>%
          surface_covered = replace_na(surface_covered, m_sup_cubierta),
          surface_total = replace_na(surface_total, m_sup_total))
 
+test <- test %>%
+  mutate(rooms= replace_na(rooms, 3), #No se coloca bedrooms, toda vez que, para train no se evidencian NA's
+         bathrooms = replace_na(bathrooms, 2),
+         surface_covered = replace_na(surface_covered, m_sup_cubierta),
+         surface_total = replace_na(surface_total, m_sup_total))
+
+m_test_cubierta <- median(train$surface_covered, na.rm = T) 
+m_test_total <- median(train$surface_total, na.rm = T)
+
 m_test_cubierta <- median(test$surface_covered, na.rm = T) 
 m_test_total <- median(test$surface_total, na.rm = T)
 
 test <- test %>%
+  mutate(rooms= replace_na(rooms, 3),
+         bathrooms = replace_na(bathrooms, 2),
+         surface_covered = replace_na(surface_covered, m_test_cubierta),
+         surface_total = replace_na(surface_total, m_test_total))
+
+train <- train %>%
   mutate(rooms= replace_na(rooms, 3),
          bathrooms = replace_na(bathrooms, 2),
          surface_covered = replace_na(surface_covered, m_test_cubierta),
@@ -102,12 +128,26 @@ summary(train$price) %>%
   as.data.frame() %>%
   mutate(V1=scales::dollar(V1)) # precios de $1.650.000.000 en Chapi?
 
+summary(test$price) %>%
+  as.matrix() %>%
+  as.data.frame() %>%
+  mutate(V1=scales::dollar(V1)) # precios de $1.650.000.000 en Chapi?
+
+
 train <- train %>% mutate (precio_mt2= price / surface_total)
+
+test <- test %>% mutate (precio_mt2= price / surface_total)
 
 summary(train$precio_mt2) %>%
   as.matrix() %>%
   as.data.frame() %>%
   mutate(V1=scales::dollar(V1)) #Se evidencia que precio por metro cuadrado minimo $20 mil y max $40 millones
+
+summary(test$precio_mt2) %>%
+  as.matrix() %>%
+  as.data.frame() %>%
+  mutate(V1=scales::dollar(V1)) #Se evidencia que precio por metro cuadrado minimo $20 mil y max $40 millones
+
 
 Ploty_log <- ggplot(train, aes(x = precio_mt2)) + geom_histogram(fill="gold2", alpha= 0.9) +
   labs(x="Valor de venta (log-scale)", y="Cantidad") +
@@ -121,10 +161,34 @@ Ploty <- ggplot(train, aes(x = price)) + geom_histogram(fill="gold2", alpha= 0.9
   theme_bw()
 ggplotly(Ploty)
 
+###
+Ploty_log <- ggplot(test, aes(x = precio_mt2)) + geom_histogram(fill="gold2", alpha= 0.9) +
+  labs(x="Valor de venta (log-scale)", y="Cantidad") +
+  scale_x_log10(labels = scales::dollar) +
+  theme_bw()
+ggplotly(Ploty_log)
+
+Ploty <- ggplot(test, aes(x = price)) + geom_histogram(fill="gold2", alpha= 0.9) +
+  labs(x="Valor de venta (log-scale)", y="Cantidad") +
+  scale_x_log10(labels = scales::dollar) +
+  theme_bw()
+ggplotly(Ploty)
+
+
+
+
 leaflet() %>%
   addTiles() %>%
   addCircles(lng= train$lon,
              lat= train$lat)
+
+
+leaflet() %>%
+  addTiles() %>%
+  addCircles(lng= test$lon,
+             lat= test$lat)
+
+
 
 limites <- getbb("Localidad Chapinero") #b box
 
@@ -137,10 +201,29 @@ train <- train %>%
 train <- train %>%
   mutate(color = case_when(property_type == "Apartamento" ~ "red",
                            property_type == "Casa"~ "blue"))
+
+
+test <- test %>%
+  filter(
+    between(lon, limites[1, "min"], limites[1, "max"]) &
+      between(lat, limites[2, "min"], limites[2, "max"])
+  )
+
+test <- test %>%
+  mutate(color = case_when(property_type == "Apartamento" ~ "red",
+                           property_type == "Casa"~ "blue"))
+
+
+
 #Plot Map
 
 latitud_central <- mean(train$lat)
 longitud_central <- mean(train$lon)
+
+
+latitud_central <- mean(test$lat)
+longitud_central <- mean(test$lon)
+
 
 # Centrar precio metro cuadrado
 
@@ -168,4 +251,56 @@ m <- leaflet() %>%
              opacity = 0.5,
              radius = train$precio_por_mt2_sc*10,
              popup = html)
+
+#######TEST
+
+
+# Centrar precio metro cuadrado
+
+test <- test %>%
+  mutate(precio_por_mt2_sc=((precio_mt2 - min(precio_mt2))/max(precio_mt2) - min(precio_mt2)))
+
+html <- paste0("<b>Precio:</b>",
+               scales::dollar(train$price),
+               "<br> <b>Area:</b>",
+               as.integer(train$surface_total), "mt2",
+               "<br> <b>Tipo de inmueble:</br>",
+               test$property_type,
+               "<br> <b>Numero de alcobas:</b>",
+               as.integer(test$rooms),
+               "<br><b>Numero de baños:</b>",
+               as.integer(test$bathrooms))
+
+m2 <- leaflet() %>%
+  addTiles() %>%
+  setView(lng= longitud_central, lat = latitud_central, zoom= 12) %>%
+  addCircles(lng = test$lon,
+             lat = test$lat,
+             col = test$color,
+             fillOpacity = 0.5,
+             opacity = 0.5,
+             radius = test$precio_por_mt2_sc*10,
+             popup = html)
+
+
+
+####CONVERTIMOS A DATA FRAME Y SALVAMOS EN CSV-------------------------------
+
+
+###TRAIN------------
+class(train)
+p_load(sfheaders)
+train_df<-sf_to_df(train, fill = TRUE)
+class(train_df)
+
+write_csv(train_df, file="trainf.csv")
+
+##TEST--------------------------
+class(test)
+test_df<-sf_to_df(test, fill = TRUE)
+class(test_df)
+
+write_csv(test_df, file="testf.csv")
+####
+
 
