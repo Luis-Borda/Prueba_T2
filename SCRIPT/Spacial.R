@@ -139,7 +139,7 @@ p <- ggplot(train%>%sample_n(1000), aes(x = area_parque, y = price)) +
   theme_bw()
 ggplotly(p)
 
-####### *VARIABLE VIAS* (mismo procedimiento) ############
+####### *VARIABLE ESTACIONES DE TRANSMILENIO* (mismo procedimiento) ############
 
 # Extraemos la info de las estaciones del Transmilenio
 
@@ -202,6 +202,34 @@ p <- ggplot(train, aes(x = distancia_bus)) +
   theme_bw()
 library(units)
 ggplotly(p)
+
+################################################################################
+#################     DISTANCIA A AVENIDAS MAS CERCANAS         ################
+################################################################################
+
+
+train<-st_as_sf(train,coords=c("lon","lat"),crs=4326,remove=FALSE) #as an sf object
+
+avenidas <- opq(bbox=getbb("Bogota Colombia"))%>%
+  add_osm_feature(key = "highway", value = "secondary")
+
+avenidas_sf <- osmdata_sf(avenidas)
+
+avenidas_geometria <- avenidas_sf$osm_lines%>%
+  select (osm_id, name)
+
+leaflet()%>%
+  addTiles()%>%
+  addPolygons(data = avenidas_geometria, col = "#F72585",
+              opacity = 0.8, popup= avenidas_geometria)%>%
+  addCircles(data=train)
+
+#Busco la geometría más cercana
+cercano <- st_nearest_feature(train,avenidas_geometria)
+#calculo la distancia
+dist <-st_distance(train, avenidas_geometria[cercano,], by_element=TRUE)
+dist
+train$distancia_avenida_principal<-dist
 
 
 
