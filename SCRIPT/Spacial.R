@@ -614,21 +614,6 @@ ggplot()+
   theme_bw()
 
 
-################################################################################
-####              Obtenenemos salones comunales                                 ####
-################################################################################
-
-
-salones_comunales<- bogota %>% 
-  add_osm_feature(key="amenity",value="community_centre") %>% 
-  osmdata_sf() 
-
-puntos_SC<-community_centre$osm_point
-head(puntos_SC)
-
-ggplot()+
-  geom_sf(data=puntos_SC) +
-  theme_bw()
 
 
 ################################################################################
@@ -649,21 +634,6 @@ ggplot()+
 
 
 
-################################################################################
-####              Obtenenemos bares                                 ####
-################################################################################
-
-
-bar<- bogota %>% 
-  add_osm_feature(key="amenity",value="bar") %>% 
-  osmdata_sf() 
-
-pbar<-bar$osm_point
-head(puntos_SC)
-
-ggplot()+
-  geom_sf(data=pbar) +
-  theme_bw()
 
 ################################################################################
 ####              Obtenenemos hospitales                                 ####
