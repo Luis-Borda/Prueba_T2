@@ -625,9 +625,9 @@ dist_matrixc <- st_distance(x = cole_sf, y = puntos_SC)
 # Encontramos la distancia mínima a los colegios
 dist_minc <- apply(dist_matrixc, 1, min)
 # La agregamos como variablea nuestra base de datos original 
-train <- train %>% mutate(dist_cole = dist_minc)
+train <- train %>% mutate(puntos_SC = dist_minc)
 
-cf <- ggplot(train, aes(x = puntos_SC)) +
+cf <- ggplot(train, aes(x = dist_minc)) +
   geom_histogram(bins = 50, fill = "darkblue", alpha = 0.4) +
   labs(x = "Distancia mínima a los colegios en metros", y = "Cantidad",
        title = "Distribución de la distancia a los colegios") +
@@ -635,7 +635,7 @@ cf <- ggplot(train, aes(x = puntos_SC)) +
 ggplotly(cf)
 
 #Relación del precio vs la distancia a los colegios 
-rest <- ggplot(train%>%sample_n(1000), aes(x = distancia_colegios, y = price)) +
+cfp <- ggplot(train%>%sample_n(1000), aes(x = dist_minc, y = price)) +
   geom_point(col = "darkblue", alpha = 0.4) +
   labs(x = "Distancia mínima a los colegios en metros (log-scale)", 
        y = "Valor de venta  (log-scale)",
@@ -643,7 +643,7 @@ rest <- ggplot(train%>%sample_n(1000), aes(x = distancia_colegios, y = price)) +
   scale_x_log10() +
   scale_y_log10(labels = scales::dollar) +
   theme_bw()
-ggplotly(rest)
+ggplotly(cfp)
 
 ###############TEST
 
@@ -653,12 +653,12 @@ cole_sf <- st_as_sf(test, coords = c("lon", "lat"))
 st_crs(cole_sf) <- 4326
 
 # Calculamos las distancias para cada combinacion immueble - colegios
-dist_matrix <- st_distance(x = jar_sf, y = puntos_jar)
+dist_matrixc <- st_distance(x = cole_sf, y = puntos_SC)
 
 # Encontramos la distancia mínima a un restaurante
-dist_min <- apply(dist_matrix, 1, min)
+dist_minc <- apply(dist_matrixc, 1, min)
 # La agregamos como variablea nuestra base de datos original 
-test <- test %>% mutate(puntos_jar = dist_min)
+test <- test %>% mutate(puntos_SC = dist_minc)
 
 
 
