@@ -543,7 +543,7 @@ jardines<- bogota %>%
   osmdata_sf() 
 
 puntos_jar<-jardines$osm_point
-head(puntos_jardines)
+head(puntos_jar)
 
 ggplot()+
   geom_sf(data=puntos_jar) +
@@ -563,7 +563,7 @@ dist_minj <- apply(dist_matrixj, 1, min)
 # La agregamos como variablea nuestra base de datos original 
 train <- train %>% mutate(dist_jar = dist_minj)
 
-jf <- ggplot(train, aes(x = puntos_jar)) +
+jf <- ggplot(train, aes(x = dist_minj)) +
   geom_histogram(bins = 50, fill = "darkblue", alpha = 0.4) +
   labs(x = "Distancia mínima a los jardines en metros", y = "Cantidad",
        title = "Distribución de la distancia a los jardines") +
@@ -571,7 +571,7 @@ jf <- ggplot(train, aes(x = puntos_jar)) +
 ggplotly(jf)
 
 #Relación del precio vs la distancia a los jardines infantiles 
-rest <- ggplot(train%>%sample_n(1000), aes(x = distancia_policia, y = price)) +
+jar <- ggplot(train%>%sample_n(1000), aes(x = dist_minj, y = price)) +
   geom_point(col = "darkblue", alpha = 0.4) +
   labs(x = "Distancia mínima a los restaurantes en metros (log-scale)", 
        y = "Valor de venta  (log-scale)",
@@ -579,7 +579,7 @@ rest <- ggplot(train%>%sample_n(1000), aes(x = distancia_policia, y = price)) +
   scale_x_log10() +
   scale_y_log10(labels = scales::dollar) +
   theme_bw()
-ggplotly(rest)
+ggplotly(jar)
 
 ###############TEST
 
@@ -606,12 +606,59 @@ colegios<- bogota %>%
   add_osm_feature(key="amenity",value="school") %>% 
   osmdata_sf() 
 
-puntos_colegios<-colegios$osm_point
+puntos_SC<-colegios$osm_point
 head(puntos_SC)
 
 ggplot()+
   geom_sf(data=puntos_colegios) +
   theme_bw()
+
+--------
+  
+cole_sf <- st_as_sf(train, coords = c("lon", "lat"))
+# Especificamos el sistema de coordenadas.
+st_crs(cole_sf) <- 4326
+
+# Calculamos las distancias para cada combinacion immueble - colegios
+dist_matrixc <- st_distance(x = cole_sf, y = puntos_SC)
+
+# Encontramos la distancia mínima a los colegios
+dist_minc <- apply(dist_matrixc, 1, min)
+# La agregamos como variablea nuestra base de datos original 
+train <- train %>% mutate(dist_cole = dist_minc)
+
+cf <- ggplot(train, aes(x = puntos_SC)) +
+  geom_histogram(bins = 50, fill = "darkblue", alpha = 0.4) +
+  labs(x = "Distancia mínima a los colegios en metros", y = "Cantidad",
+       title = "Distribución de la distancia a los colegios") +
+  theme_bw()
+ggplotly(cf)
+
+#Relación del precio vs la distancia a los colegios 
+rest <- ggplot(train%>%sample_n(1000), aes(x = distancia_colegios, y = price)) +
+  geom_point(col = "darkblue", alpha = 0.4) +
+  labs(x = "Distancia mínima a los colegios en metros (log-scale)", 
+       y = "Valor de venta  (log-scale)",
+       title = "Relación entre la proximidad a los colegios y el precio del immueble") +
+  scale_x_log10() +
+  scale_y_log10(labels = scales::dollar) +
+  theme_bw()
+ggplotly(rest)
+
+###############TEST
+
+
+cole_sf <- st_as_sf(test, coords = c("lon", "lat"))
+# Especificamos el sistema de coordenadas.
+st_crs(cole_sf) <- 4326
+
+# Calculamos las distancias para cada combinacion immueble - colegios
+dist_matrix <- st_distance(x = jar_sf, y = puntos_jar)
+
+# Encontramos la distancia mínima a un restaurante
+dist_min <- apply(dist_matrix, 1, min)
+# La agregamos como variablea nuestra base de datos original 
+test <- test %>% mutate(puntos_jar = dist_min)
 
 
 
