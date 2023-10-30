@@ -661,45 +661,6 @@ dist_minc <- apply(dist_matrixc, 1, min)
 test <- test %>% mutate(puntos_SC = dist_minc)
 
 
-
-
-################################################################################
-####              Obtenenemos Parqueaderos                                  ####
-################################################################################
-
-
-parking<- bogota %>% 
-  add_osm_feature(key="amenity",value="parking") %>% 
-  osmdata_sf() #transformamos a un objeto sf
-
-puntos_parking<-parking$osm_point
-head(puntos_parking)
-
-ggplot()+
-  geom_sf(data=puntos_parking) +
-  theme_bw()
-
-
-
-
-################################################################################
-####              Obtenenemos hospitales                                 ####
-################################################################################
-
-
-hospital<- bogota %>% 
-  add_osm_feature(key="amenity",value="hospital") %>% 
-  osmdata_sf() 
-
-phospital<-hospital$osm_point
-head(phospital)
-
-ggplot()+
-  geom_sf(data=phospital) +
-  theme_bw()
-
-
-
 ####CONVERTIMOS A DATA FRAME Y SALVAMOS EN CSV-------------------------------
 
 ###TRAIN------------
@@ -708,14 +669,14 @@ p_load(sfheaders)
 train_df<-sf_to_df(train, fill = TRUE)
 class(train_df)
 
-write_csv(train_df, file="Bogota_train.csv")
+write_csv(train_df, file="train.csv")
 
 ##TEST--------------------------
 class(test)
 test_df<-sf_to_df(test, fill = TRUE)
 class(test_df)
 
-write_csv(test_df, file="Bogota_test.csv")
+write_csv(test_df, file="test.csv")
 ####
 ##
 
