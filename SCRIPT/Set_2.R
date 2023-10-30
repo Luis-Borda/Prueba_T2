@@ -7,6 +7,11 @@
 #
 ################################################################################
 
+#Limpieza de area de trabajo ---------------------------------------------------
+
+rm(list = ls())
+
+
 library(pacman)
 library(leaflet)
 library(stringi)
@@ -76,9 +81,9 @@ sapply(test, function(x) sum(is.na(x)))
 
 ## Imputación de datos faltantes por mediana y moda
 
-table(train$rooms) #Se evidencia que la mayoría de viviendas tienen 3 cuartos, por lo tanto se imputan los datos con moda = 3
-table(test$price) #Se evidencia que la mayoría de viviendas tienen 3 dormitorios, por lo tanto se imputan los datos con moda = 3
-table(train$bathrooms) #Se evidencia que la mayoría de viviendas tienen 3 cuartos, por lo tanto se imputan los datos con moda = 3
+table(train$rooms) #Se evidencia que la mayoría de viviendas tienen 3 habitaciones, por lo tanto se imputan los datos con moda = 3
+table(test$bedrooms) #Se evidencia que la mayoría de viviendas tienen 3 dormitorios, por lo tanto se imputan los datos con moda = 3
+table(train$bathrooms) #Se evidencia que la mayoría de viviendas tienen 2 baños, por lo tanto se imputan los datos con moda = 2
 
 #El mismo análisis se hace con los datos en la base test
 
