@@ -35,13 +35,17 @@ p_load(tidyverse, # Manipular dataframes
        randomForest, # Modelos de bosque aleatorio
        rattle, # Interfaz gráfica para el modelado de datos
        spatialsample,# Muestreo espacial para modelos de aprendizaje automático
-       tmaptools) 
+       tmaptools,
+       readr) 
 
 
 #Importar los datos---------------------------------------------------------
 
-train <- read.csv("E:/USB/MECA-CLASES/5. BIG DATA/TALLER 2/DATA/train.csv", row.names=1) 
-                  
+library(readr)
+
+test <- read_csv("C:/Users/lordb/Documents/Prueba_T2/SCRIPT/test.csv")
+train <- read_csv("C:/Users/lordb/Documents/Prueba_T2/SCRIPT/train.csv")
+
                   
 train$description [1]
 
@@ -63,16 +67,16 @@ train <- train %>%
 
 
 train %>%
-  filter(property_type_2 == "Apartamento") %>%
+  filter(property_type == "Apartamento") %>%
   count(piso_numerico)
 
 
 train %>%
-  filter(property_type_2 == "Casa") %>%
+  filter(property_type == "Casa") %>%
   count(piso_numerico)
 
 
-train <- db %>%
+train <- train %>%
   mutate(piso_numerico = replace_na(piso_numerico, 1))
 
 #CREAMOS LA VARIABLE DE ÁREA TOTAL
@@ -98,7 +102,7 @@ sapply(train, function(x) sum(is.na(x)))
 
 #CREAMOS LA VARIABLE DE PARQUEADEROS
 
-#train <- train %>%
+train <- train %>%
   mutate(parqueadero= str_extract(description, "(\\w+|\\d+) parqueadero (\\w+|\\d+)"))
 
 
