@@ -448,5 +448,24 @@ ggplot()+
 
 
 
+####CONVERTIMOS A DATA FRAME Y SALVAMOS EN CSV-------------------------------
+
+###TRAIN------------
+class(train)
+p_load(sfheaders)
+train_df<-sf_to_df(train, fill = TRUE)
+class(train_df)
+
+write_csv(train_df, file="Bogota_train.csv")
+
+##TEST--------------------------
+class(test)
+test_df<-sf_to_df(test, fill = TRUE)
+class(test_df)
+
+write_csv(test_df, file="Bogota_test.csv")
+####
+##
+
 
 
