@@ -158,7 +158,6 @@ parada_de_bus_sf_geometria <- parada_de_bus_sf$osm_polygons %>%
 # Calculamos el centroide de cada estacione para aproximar su ubicación como un solo punto 
 
 centroides <- gCentroid(as(parada_de_bus_sf_geometria$geometry, "Spatial"), byid = T)
-#** aquí tenias este código en comentario*#
 
 centroides <-st_centroid(parada_de_bus_sf_geometria$geometry)
 
@@ -183,7 +182,6 @@ train_sf <- st_as_sf(train, coords = c("lon", "lat"), crs=4326)
 # convertimos los centroides a formato sf(simple features) 
 
 centroides_sf <- st_as_sf(centroides, coords = c("lon", "lat"), crs=4326)
-#** aquí tenias este código en comentario* x2 ¿Why?#
 
 centroides_sf <- do.call(rbind, st_geometry(centroides)) %>% 
   as_tibble() %>% setNames(c("lon","lat")) 
@@ -204,10 +202,6 @@ p <- ggplot(train, aes(x = distancia_bus)) +
   theme_bw()
 library(units)
 ggplotly(p)
-
-
-
-
 
 
 
@@ -247,8 +241,8 @@ db_sf <- st_as_sf(train, coords = c("lon", "lat"))
 st_crs(db_sf) <- 4326
 # convertimos los scontroides a formato sf(simple features)
 centroides_U <- st_as_sf(centroidesU, coords = c("x", "y"))
-# Esto va a ser demorado!
-# Calculamos las diatnacias para cada combinacion immueble - parque
+
+# Calculamos las distancias para cada combinacion immueble - universidad
 dist_matrix <- st_distance(x = db_sf, y = centroides_U)
 
 # Encontramos la distancia mínima a una Universidad
