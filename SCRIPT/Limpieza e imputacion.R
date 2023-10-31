@@ -189,13 +189,16 @@ leaflet() %>%
              lat= test$lat)
 
 
+###
+limites1 <- getbb("Bogotá Colombia") #b box
+limites2 <- getbb("Localidad Chapinero") #b box
 
-limites <- getbb("Localidad Chapinero") #b box
+
 
 train <- train %>%
   filter(
-    between(lon, limites[1, "min"], limites[1, "max"]) &
-      between(lat, limites[2, "min"], limites[2, "max"])
+    between(lon, limites1[1, "min"], limites1[1, "max"]) &
+      between(lat, limites1[2, "min"], limites1[2, "max"])
   )
 
 train <- train %>%
@@ -205,8 +208,8 @@ train <- train %>%
 
 test <- test %>%
   filter(
-    between(lon, limites[1, "min"], limites[1, "max"]) &
-      between(lat, limites[2, "min"], limites[2, "max"])
+    between(lon, limites2[1, "min"], limites2[1, "max"]) &
+      between(lat, limites2[2, "min"], limites2[2, "max"])
   )
 
 test <- test %>%
