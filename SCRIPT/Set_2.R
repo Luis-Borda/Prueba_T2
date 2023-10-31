@@ -32,8 +32,7 @@ p_load(tidyverse, # Manipular dataframes
        mapview, # Mapas estaticos
        VIM,
        discrim,
-       kknn,
-       stargazer) 
+       kknn) 
 
 test <- read_csv("C:/Users/Hp/Documents/MeCA - Big Data and Machine Learning/Set_2/Set_2/test.csv")
 train <- read_csv("C:/Users/Hp/Documents/MeCA - Big Data and Machine Learning/Set_2/Set_2/train.csv")
