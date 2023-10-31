@@ -219,8 +219,9 @@ sl.lib <- c("SL.randomForest", "SL.lm") #lista de los algoritmos a correr
 # Fit using the SuperLearner package, 
 install.packages("randomForest")
 
+
 fitY <- SuperLearner(Y = ySL,  X= data.frame(XSL),
-                     method = "method.NNLS", # combinación convexa
+                     method = "method.NNLS2", # combinación convexa
                      SL.library = sl.lib)
 
 fitY
@@ -446,11 +447,12 @@ colnames(bdtrain_is)
 listWrappers()
 
 ySL<- bdtrain_is$price
-XSL<- bdtrain_is  %>% select(surface_total+surface_covered+rooms+bedrooms+bathrooms+
-                               distancia_parque+area_parque+distancia_bus+
-                               distancia_avenida_principal+distancia_universidad+distancia_policia+
-                               dist_jar+puntos_SC+dist_cole+property_type)
-
+ySL <- ySL[1:1000]
+XSL<- bdtrain_is  %>% select(surface_total,surface_covered,rooms,bedrooms,bathrooms,
+                               distancia_parque,area_parque,distancia_bus,
+                               distancia_avenida_principal,distancia_universidad,distancia_policia,
+                               dist_jar,puntos_SC,dist_cole,property_type)
+XSL <- XSL[1:1000,]
 sl.lib <- c("SL.randomForest", "SL.lm") #lista de los algoritmos a correr
 
 # Fit using the SuperLearner package, 
@@ -501,4 +503,8 @@ Submission4 <- Submission4 %>%
 setwd("~/Desktop/MAESTRIA 2023/Big Data and Machine Learning/Repositorios/Taller_Chapinero_Chique_Sanchez_Castro/Data/")
 
 write.csv(Submission4, file="submission4.csv", row.names = F)
+
+
+
+
 
