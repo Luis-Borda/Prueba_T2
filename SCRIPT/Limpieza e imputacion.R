@@ -285,6 +285,8 @@ m2 <- leaflet() %>%
              radius = test$precio_por_mt2_sc*10,
              popup = html)
 
+colnames(test)[24] <- "dist_jar"
+colnames(test)[23] <- "dist_cole"
 
 
 ####CONVERTIMOS A DATA FRAME Y SALVAMOS EN CSV-------------------------------
