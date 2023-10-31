@@ -245,6 +245,19 @@ t <- ggplot(train, aes(x = distancia_bus)) +
 library(units)
 ggplotly(t)
 
+#Se realiza el gráfico (plot) de la relación 
+
+p <- ggplot(train%>%sample_n(1000), aes(x = distancia_bus, y = price)) +
+  geom_point(col = "darkblue", alpha = 0.4) +
+  labs(x = "Distancia estación más cercana (log-scale)", 
+       y = "Precio de la vivienda (log-scale)",
+       title = "Relación entre la distancia a una estación y el precio del immueble") +
+  scale_x_log10() +
+  scale_y_log10(labels = scales::dollar) +
+  theme_bw()
+ggplotly(p)
+
+
 #######################TEST 
 latitud_central <- mean(test$lat)
 longitud_central <- mean(test$lon)

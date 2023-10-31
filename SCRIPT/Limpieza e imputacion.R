@@ -194,13 +194,16 @@ leaflet() %>%
              lat= test$lat)
 
 
+###
+limites1 <- getbb("Bogotá Colombia") #b box
+limites2 <- getbb("Localidad Chapinero") #b box
 
-limites <- getbb("Localidad Chapinero") #b box
+
 
 train <- train %>%
   filter(
-    between(lon, limites[1, "min"], limites[1, "max"]) &
-      between(lat, limites[2, "min"], limites[2, "max"])
+    between(lon, limites1[1, "min"], limites1[1, "max"]) &
+      between(lat, limites1[2, "min"], limites1[2, "max"])
   )
 
 train <- train %>%
@@ -210,8 +213,8 @@ train <- train %>%
 
 test <- test %>%
   filter(
-    between(lon, limites[1, "min"], limites[1, "max"]) &
-      between(lat, limites[2, "min"], limites[2, "max"])
+    between(lon, limites2[1, "min"], limites2[1, "max"]) &
+      between(lat, limites2[2, "min"], limites2[2, "max"])
   )
 
 test <- test %>%
@@ -298,6 +301,15 @@ ggpairs(train, columns = 2:8, aes(colour = property_type),
   theme(panel.background = element_rect(fill = "white"),
         axis.text = element_blank(),  # Ocultar etiquetas de los ejes
         axis.title = element_blank())  # Ocultar títulos de los ejes
+
+
+
+#<<<<<<< HEAD
+#=======
+colnames(test)[24] <- "dist_jar"
+colnames(test)[23] <- "dist_cole"
+
+#>>>>>>> 958ef5e6dc27e6ec712c45f97c2864b23f2625c4
 
 
 ####CONVERTIMOS A DATA FRAME Y SALVAMOS EN CSV-------------------------------
