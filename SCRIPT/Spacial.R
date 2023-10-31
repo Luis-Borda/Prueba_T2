@@ -247,17 +247,15 @@ ggplotly(t)
 
 #Se realiza el gráfico (plot) de la relación 
 
-p <- ggplot(train%>%sample_n(1000), aes(x = area_parque, y = price)) +
-  geom_point(col = "gold2", alpha = 0.4) +
-  labs(x = "Área del parque más cercano (log-scale)", 
-       y = "Valor del arriendo (log-scale)",
-       title = "Relación entre área de un parque y el precio del immueble") +
+p <- ggplot(train%>%sample_n(1000), aes(x = distancia_bus, y = price)) +
+  geom_point(col = "darkblue", alpha = 0.4) +
+  labs(x = "Distancia estación más cercana (log-scale)", 
+       y = "Precio de la vivienda (log-scale)",
+       title = "Relación entre la distancia a una estación y el precio del immueble") +
   scale_x_log10() +
   scale_y_log10(labels = scales::dollar) +
   theme_bw()
 ggplotly(p)
-
-
 
 
 #######################TEST 
