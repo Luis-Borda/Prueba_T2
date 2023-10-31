@@ -28,7 +28,12 @@ p_load(tidyverse, # Manipular dataframes
        discrim,
        kknn,
        stargazer,
-       readr) 
+       readr,
+       yardstick,
+       GGally,
+       rattle,
+       randomForest,
+       C50)
 
 test <- read_csv("C:/Users/lordb/Documents/Prueba_T2/SCRIPT/test.csv")
 train <- read_csv("C:/Users/lordb/Documents/Prueba_T2/SCRIPT/train.csv")
@@ -285,8 +290,26 @@ m2 <- leaflet() %>%
              radius = test$precio_por_mt2_sc*10,
              popup = html)
 
+train$property_type <- as.factor(train$property_type)
+str(train$property_type)
+
+
+ggpairs(train, columns = 2:8, aes(colour = property_type),
+        lower = list(continuous = "points", combo = "facethist"),
+        diag = list(continuous = "barDiag", combo = "densityDiag")) +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "white"),
+        axis.text = element_blank(),  # Ocultar etiquetas de los ejes
+        axis.title = element_blank())  # Ocultar títulos de los ejes
+
+
+
+#<<<<<<< HEAD
+#=======
 colnames(test)[24] <- "dist_jar"
 colnames(test)[23] <- "dist_cole"
+
+#>>>>>>> 958ef5e6dc27e6ec712c45f97c2864b23f2625c4
 
 
 ####CONVERTIMOS A DATA FRAME Y SALVAMOS EN CSV-------------------------------
