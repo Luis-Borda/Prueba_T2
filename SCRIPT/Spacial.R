@@ -245,6 +245,21 @@ t <- ggplot(train, aes(x = distancia_bus)) +
 library(units)
 ggplotly(t)
 
+#Se realiza el gráfico (plot) de la relación 
+
+p <- ggplot(train%>%sample_n(1000), aes(x = area_parque, y = price)) +
+  geom_point(col = "gold2", alpha = 0.4) +
+  labs(x = "Área del parque más cercano (log-scale)", 
+       y = "Valor del arriendo (log-scale)",
+       title = "Relación entre área de un parque y el precio del immueble") +
+  scale_x_log10() +
+  scale_y_log10(labels = scales::dollar) +
+  theme_bw()
+ggplotly(p)
+
+
+
+
 #######################TEST 
 latitud_central <- mean(test$lat)
 longitud_central <- mean(test$lon)
